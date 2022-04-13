@@ -18,6 +18,7 @@ Route::middleware('api')->group(function () {
     Route::resource('categories', 'App\Http\Controllers\API\CategoryController');
     Route::resource('articles', 'App\Http\Controllers\API\ArticleController');
     Route::resource('authors', 'App\Http\Controllers\API\UserController');
+    Route::resource('settings', 'App\Http\Controllers\API\SettingsController');
 });
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {

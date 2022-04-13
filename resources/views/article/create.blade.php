@@ -11,8 +11,8 @@
     <div class="col">@include('partials.video', ['placeholder' => 'Video','id' => 'video', 'path' => 'articles'])</div>
 </div>
 @include('partials.selectmultiple', ['placeholder' => 'Categories *','id' => 'categories', 'options' => $categories,'required' => true])
-@include('partials.input', ['placeholder' => 'Title *','id' => 'title',])
-@include('partials.textarea', ['placeholder' => 'Description *','id' => 'description', 'class' => 'ckeditor'])
+@include('partials.input', ['placeholder' => 'Title *','id' => 'title','required' => true])
+@include('partials.textarea', ['placeholder' => 'Description *','id' => 'description', 'class' => 'ckeditor', 'required' => true])
 @include('partials.textarea', ['placeholder' => 'Tips','id' => 'tips', 'class' => 'ckeditor'])
 @include('partials.textarea', ['placeholder' => 'References','id' => 'references', 'class' => 'ckeditor'])
 @include('partials.textarea', ['placeholder' => 'Article Info','id' => 'articleInfo', 'class' => 'ckeditor'])
@@ -27,7 +27,7 @@
 @push('js')
 <script>
     $(document).ready(function() {
-    $('#categories').select2();
-});
+        $('#categories').select2();
+    });
 </script>
 @endpush

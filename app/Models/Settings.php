@@ -17,6 +17,7 @@ class Settings extends Model
         'appVersion',
         'shortDescription',
         'fcmKey',
+        'aboutUs',
     ];
 
     protected $casts = [
@@ -25,5 +26,6 @@ class Settings extends Model
         'appVersion' => 'string',
         'shortDescription' => 'string',
         'fcmKey' => 'string',
+        'aboutUs' => 'string',
     ];
 }

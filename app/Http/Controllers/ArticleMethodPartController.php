@@ -6,6 +6,8 @@ use App\Models\ArticleMethod;
 use App\Models\ArticleMethodPart;
 use Illuminate\Http\Request;
 
+use function PHPUnit\Framework\isEmpty;
+
 class ArticleMethodPartController extends Controller
 {
 
@@ -15,9 +17,18 @@ class ArticleMethodPartController extends Controller
         return view('pages.associated_method_parts', compact('articleMethodParts'));
     }
 
-    public function deleteArticleMethodPart()
+    public function deleteArticleMethodPart(Request $request)
     {
-        $articleMethodParts = ArticleMethodPart::where(['id' => $request->id])->get();
+        $articlemethods = ArticleMethodPart::where('id', $request->partId)->get();
+        if (count($articlemethods) > 0) {
+            $lastPart =  ((int)$articlemethods->last()->part);
+        } else {
+            $lastPart = 1;
+        }
+
+        ArticleMethodPart::find($request->partId)->delete();
+
+        return response()->json($lastPart, 200);
     }
 
     /**
@@ -48,11 +59,19 @@ class ArticleMethodPartController extends Controller
      */
     public function store(Request $request)
     {
-        $articleMethodPart = new ArticleMethodPart;
-        $articleMethodPart->articleId = $request->articleId;
-        $articleMethodPart->part = $request->part;
-        $articleMethodPart->title = $request->title;
-        $articleMethodPart->save();
+        if ($request->partId == null) {
+            $articleMethodPart = new ArticleMethodPart;
+            $articleMethodPart->articleId = $request->articleId;
+            $articleMethodPart->part = $request->part;
+            $articleMethodPart->title = $request->title;
+            $articleMethodPart->save();
+        } else {
+            $articleMethodPart = ArticleMethodPart::find($request->partId);
+            $articleMethodPart->articleId = $request->articleId;
+            $articleMethodPart->part = $request->part;
+            $articleMethodPart->title = $request->title;
+            $articleMethodPart->update();
+        }
     }
 
     /**
@@ -64,7 +83,14 @@ class ArticleMethodPartController extends Controller
     public function showMethodForm($articleId, $partId)
     {
         $data = ArticleMethod::where(['articleId' => $articleId, 'partId' => $partId])->get();
-        return view('article.add', compact('data', 'articleId', 'partId'));
+        $articlemethods = ArticleMethod::where(['articleId' => $articleId, 'partId' => $partId])->get();
+        if (count($articlemethods) > 0) {
+            $lastNumber =  ((int)$articlemethods->last()->number + 1);
+        } else {
+            $lastNumber = 1;
+        }
+        $parts = ArticleMethodPart::where(['articleId' => $articleId])->get();
+        return view('article.add', compact('data', 'articleId', 'partId', 'lastNumber', 'parts'));
     }
 
     /**

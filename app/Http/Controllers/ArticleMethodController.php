@@ -16,17 +16,29 @@ class ArticleMethodController extends Controller
 
     public function getArticleMethodsSummary()
     {
-
     }
 
     public function addArticleMethod()
     {
-
     }
 
-    public function deleteArticleMethod()
+    public function deleteArticleMethod(Request $request)
     {
+        $method = ArticleMethod::find($request->methodId);
+        if ($method->image != null) {
+            $oldImagePath = public_path("/uploads/articles/methods/$method->image");
+            unlink($oldImagePath);
+        }
+        $articlemethods = ArticleMethod::where('id', $request->methodId)->get();
+        if (count($articlemethods) > 0) {
+            $lastNumber =  ((int)$articlemethods->last()->number);
+        } else {
+            $lastNumber = 1;
+        }
 
+        ArticleMethod::find($request->methodId)->delete();
+
+        return response()->json($lastNumber, 200);
     }
 
     /**
@@ -61,24 +73,52 @@ class ArticleMethodController extends Controller
         //     'image' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
         // ]);
 
-        $articleMethod = new ArticleMethod;
-        $articleMethod->articleId = $request->articleId;
-        $articleMethod->number = $request->number;
-        $articleMethod->partId = $request->partId;
-        $articleMethod->title = $request->title;
-        $articleMethod->description = $request->description;
-        $articleMethod->note = $request->note;
+        if ($request->methodId == null) {
 
-        if ($request->file('image')) {
-            $image = $request->file('image');
-            $extension = $image->getClientOriginalExtension();
-            $imageName = time() . '.' . $extension;
-            $image->move('uploads/articles/methods/', $imageName);
+            $articleMethod = new ArticleMethod;
+            $articleMethod->articleId = $request->articleId;
+            $articleMethod->number = $request->number;
+            $articleMethod->partId = $request->partId;
+            $articleMethod->title = $request->title;
+            $articleMethod->description = $request->description;
+            $articleMethod->note = $request->note;
+
+            if ($request->file('image')) {
+                // if ($articleMethod->image != null) {
+                //     $oldImagePath = public_path("/uploads/articles/methods/$articleMethod->image");
+                //     unlink($oldImagePath);
+                // }
+                $image = $request->file('image');
+                $extension = $image->getClientOriginalExtension();
+                $imageName = time() . '.' . $extension;
+                $image->move('uploads/articles/methods/', $imageName);
+                $articleMethod->image = $imageName;
+            }
+
+            $articleMethod->save();
+        } else {
+            $articleMethod = ArticleMethod::find($request->methodId);
+            $articleMethod->articleId = $request->articleId;
+            $articleMethod->number = $request->number;
+            $articleMethod->partId = $request->partId;
+            $articleMethod->title = $request->title;
+            $articleMethod->description = $request->description;
+            $articleMethod->note = $request->note;
+
+            if ($request->file('image')) {
+                if ($articleMethod->image != null) {
+                    $oldImagePath = public_path("/uploads/articles/methods/$articleMethod->image");
+                    unlink($oldImagePath);
+                }
+                $image = $request->file('image');
+                $extension = $image->getClientOriginalExtension();
+                $imageName = time() . '.' . $extension;
+                $image->move('uploads/articles/methods/', $imageName);
+                $articleMethod->image = $imageName;
+            }
+
+            $articleMethod->update();
         }
-
-        $articleMethod->image = $imageName;
-        $articleMethod->save();
-
     }
 
     /**
@@ -98,9 +138,10 @@ class ArticleMethodController extends Controller
      * @param  \App\Models\ArticleMethod  $articleMethod
      * @return \Illuminate\Http\Response
      */
-    public function edit(ArticleMethod $articleMethod)
+    public function edit($id)
     {
-        //
+        $data =  ArticleMethod::find($id);
+        return view('article.editpart', compact('data'));
     }
 
     /**
@@ -110,9 +151,29 @@ class ArticleMethodController extends Controller
      * @param  \App\Models\ArticleMethod  $articleMethod
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, ArticleMethod $articleMethod)
+    public function update(Request $request, $id)
     {
-        //
+        $articleMethod =  ArticleMethod::find($id);
+        $articleMethod->number = $request->number;
+        $articleMethod->title = $request->title;
+        $articleMethod->description = $request->description;
+        $articleMethod->note = $request->note;
+
+        if ($request->hasFile('image')) {
+            if ($articleMethod->image != null) {
+                $oldImagePath = public_path("/uploads/articles/methods/$articleMethod->image");
+                unlink($oldImagePath);
+            }
+            $image = $request->file('image');
+            $extension = $image->getClientOriginalExtension();
+            $imageName = time() . '.' . $extension;
+            $image->move('uploads/articles/methods/', $imageName);
+            $articleMethod->image = $imageName;
+        }
+
+        $articleMethod->save();
+
+        return redirect()->back()->with('success', 'your message,here');
     }
 
     /**
@@ -123,6 +184,6 @@ class ArticleMethodController extends Controller
      */
     public function destroy(ArticleMethod $articleMethod)
     {
-        //
+        dd($articleMethod);
     }
 }

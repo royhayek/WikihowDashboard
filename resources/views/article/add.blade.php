@@ -22,27 +22,26 @@ use App\Models\Settings; ?>
                 </div>
 
                 <div class="card-body">
-                    <form method="POST" enctype="multipart/form-data" id="upload_image_form"
-                        action="javascript:void(0)">
+                    <form method="POST" enctype="multipart/form-data" id="upload_image_form" action="javascript:void(0)">
                         @csrf
                         @method('Post')
 
                         <div class="row">
                             <div class="col">
-                                @include('partials.input', ['placeholder' => 'Number *','id' => 'number',])
-                                @include('partials.input', ['placeholder' => 'Title *','id' => 'title',])
+                                <input type="text" id="methodId" name="methodId" hidden>
+                                @include('partials.input', ['placeholder' => 'Number *','id' => 'number', 'value' => $lastNumber])
+                                <!-- @include('partials.input', ['placeholder' => 'Title *','id' => 'title',]) -->
                             </div>
-                            <div class="col">
-                                <img id="image_preview_container" src="{{ asset('storage/image/image-preview.png') }}"
-                                    alt="preview image" style="max-height: 150px;">
+                            <div class="col" style="margin-left: 50px">
                                 @include('partials.image', ['placeholder' => 'Image','id' => 'image', 'path' =>
                                 'methods'])
                             </div>
+
                         </div>
                         @include('partials.textarea', ['placeholder' => 'Description *','id' => 'description', 'class'
                         => 'ckeditor'])
-                        @include('partials.textarea', ['placeholder' => 'Note','id' => 'note', 'class'
-                        => 'ckeditor'])
+                        <!-- @include('partials.textarea', ['placeholder' => 'Note','id' => 'note', 'class'
+                        => 'ckeditor']) -->
 
                         <button type="submit" class="btn btn-success mt-4">Save</button>
                     </form>
@@ -73,53 +72,84 @@ use App\Models\Settings; ?>
         getArticleMethodsSummary();
 
         $.ajaxSetup({
-       headers: {
-           'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-        }
-   });
+            headers: {
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+            }
+        });
 
-   $('#image').change(function(){
+        $('#image').change(function() {
 
-    let reader = new FileReader();
+            let reader = new FileReader();
 
-    reader.onload = (e) => {
+            reader.onload = (e) => {
 
-      $('#image_preview_container').attr('src', e.target.result);
-    }
+                $('#image_preview_container').attr('src', e.target.result);
+            }
 
-    reader.readAsDataURL(this.files[0]);
+            reader.readAsDataURL(this.files[0]);
 
-   });
+        });
 
-   $('#upload_image_form').submit(function(e) {
+        $('#upload_image_form').submit(function(e) {
 
-     e.preventDefault();
+            e.preventDefault();
 
-     var formData = new FormData(this);
-        formData.append('articleId', $('#articleId').val());
-        formData.append('partId', $('#partId').val())
-        formData.append('number', $('#number').val());
-        formData.append('title', $('#title').val());
-        formData.append('description', CKEDITOR.instances["description"].document.$.body.innerHTML);
-        formData.append('note',CKEDITOR.instances["note"].document.$.body.innerHTML);
+            var number = $('#number').val();
+            var description = CKEDITOR.instances["description"].document.$.body.innerHTML;
 
-     $.ajax({
-        type:'POST',
-        url: "{{ route('articlemethod.store')}}",
-        data: formData,
-        cache:false,
-        contentType: false,
-        processData: false,
-        success: (data) => {
-           this.reset();
-           getArticleMethods();
-        },
-        error: function(data){
-           console.log(data);
-         }
-       });
-   });
-});
+            if (number == "") {
+                alert("Please fill the number");
+            } else if (description == "<p><br></p>") {
+                alert("Please fill the description");
+            }
+
+            if (number != '' && description != '<p><br></p>') {
+
+                var formData = new FormData(this);
+                formData.append('articleId', $('#articleId').val());
+                formData.append('partId', $('#partId').val())
+                formData.append('number', number);
+                // formData.append('title', '');
+                formData.append('description', description);
+                // formData.append('note', CKEDITOR.instances["note"].document.$.body.innerHTML);
+
+                $.ajax({
+                    type: 'POST',
+                    url: "{{ route('articlemethod.store')}}",
+                    data: formData,
+                    cache: false,
+                    contentType: false,
+                    processData: false,
+                    success: (data) => {
+                        this.reset();
+                        getArticleMethods();
+                        // alert("Method added successfully");
+
+                        if($('#methodId').val() != null) {
+                            $('#number').val(parseInt($('#number').val()) + 1);
+                        }
+                        $('#methodId').val()
+                        CKEDITOR.instances["description"].document.$.body.innerHTML = "";
+                        document.getElementById("placeholder").src = '{{ URL::asset('/assets/img/') }}' + '/' + "placeholder.png";
+                        $("#image").attr("value", "");
+                        document.getElementById("image").src = "";
+        
+                        $(document).ready(function() {
+                            $('html,body').animate({
+                                scrollTop: document.body.scrollHeight
+                            }, {
+                                duration: '1000'
+                            });
+                        })
+                    },
+                    error: function(data) {
+                        console.log(data);
+                    }
+                });
+
+            }
+        });
+    });
 
 
 
@@ -159,6 +189,33 @@ use App\Models\Settings; ?>
         });
     }
 
+    function editArticleMethod(method) {
+
+        $('#methodId').val("");
+        $('#number').val("");
+        CKEDITOR.instances["description"].document.$.body.innerHTML = "";
+        document.getElementById("placeholder").src = '{{ URL::asset('/assets/img/') }}' + '/' + "placeholder.png";
+        $("#image").attr("value", "");
+        document.getElementById("image").src = "";
+        
+        $('#methodId').val(method.id);
+        $('#number').val(method.number);
+        CKEDITOR.instances["description"].document.$.body.innerHTML = method.description;
+        if(method.image != null) {
+        document.getElementById("placeholder").src = '{{ URL::asset('/uploads/articles/methods/') }}' + '/' + method.image;
+        } else {
+            document.getElementById("placeholder").src = '{{ URL::asset('/assets/img/') }}' + '/' + "placeholder.png";
+        }
+        $("#image").attr("value", method.image);
+        document.getElementById("image").src = '{{ URL::asset('/uploads/articles/methods/') }}' + '/' + method.image;
+
+        $('html,body').animate({
+            scrollTop: 0
+        }, {
+            duration: '1000'
+        });
+    }
+
 
     function addQuestion(questionId, examId) {
         var _token = $("input[name='_token']").val();
@@ -171,7 +228,7 @@ use App\Models\Settings; ?>
 
         $.ajaxSetup({
             headers: {
-            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
             }
         });
 
@@ -189,30 +246,30 @@ use App\Models\Settings; ?>
             },
             success: function(data) {
                 getArticleMethods();
-                getArticleMethodsSummary();
             }
         });
     }
 
-    function removeQuestion(questionId, examId) {
+    function removeQuestion(methodId) {
         var _token = $("input[name='_token']").val();
+
+        $.ajaxSetup({
+            headers: {
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+            }
+        });
 
         $.ajax({
             url: "{{ route('articlemethod.delete') }}",
             type: 'POST',
             data: {
                 _token: _token,
-                examId: examId,
-                questionId: questionId,
+                methodId: methodId,
             },
             success: function(data) {
+                $('#number').val(data);
                 getArticleMethods();
-                getArticleMethodsSummary();
             },
-            error: function(data) {
-                var errors = data.responseJSON;
-                console.log(errors);
-            }
         });
     }
 </script>

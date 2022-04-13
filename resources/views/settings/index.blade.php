@@ -10,5 +10,6 @@
 @include('partials.input', ['placeholder' => 'App Short Description','id' => 'shortDescription','value' => $data->shortDescription])
 @include('partials.input', ['placeholder' => 'App Version','id' => 'appVersion','value' => $data->appVersion])
 @include('partials.input', ['placeholder' => 'Firebase Cloud Messaging Key','id' => 'fcmKey','value' => $data->fcmKey])
+@include('partials.textarea', ['placeholder' => 'About Us','id' => 'aboutUs', 'class' => 'ckeditor', 'value' => $data->aboutUs])
 
 @endsection

@@ -13,14 +13,13 @@
                         </div>
                     </div>
                     <div class="card-body">
+
                         <form method="post" action="{{ $add_route }}" autocomplete="off" enctype="multipart/form-data">
                             @csrf
                             @method('post')
 
-                            <h6 class="heading-small text-muted mb-4">{{ $information }}</h6>
-
                             @if (session('status'))
-                            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                            <div class="alert alert-danger alert-dismissible fade show" role="alert">
                                 {{ session('status') }}
                                 <button type="button" class="close" data-dismiss="alert" aria-label="Close">
                                     <span aria-hidden="true">&times;</span>
@@ -28,6 +27,7 @@
                             </div>
                             @endif
 
+                            <h6 class="heading-small text-muted mb-4">{{ $information }}</h6>
 
                             <div class="pl-lg-4">
 

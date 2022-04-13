@@ -36,14 +36,13 @@ class UserController extends Controller
             'password' => 'required',
         ]);
 
-
-
         $user = new User;
         $user->name = $request->name;
         $user->email = $request->email;
         $user->password = Hash::make($request->password);
         $user->name = $request->name;
         $user->bio = $request->bio;
+        $user->website = $request->website;
         $user->role = 1;
         $user->status = 1;
 
@@ -79,6 +78,7 @@ class UserController extends Controller
         }
         $user->name = $request->name;
         $user->bio = $request->bio;
+        $user->website = $request->website;
         $user->role = 1;
         $user->status = 1;
 
@@ -96,5 +96,15 @@ class UserController extends Controller
         $user->update();
 
         return redirect()->route('user.index')->withStatus(__('User was updated'));
+    }
+
+    public function destroy(User $user)
+    {
+        if ($user->image != null) {
+            $oldImagePath = public_path("/uploads/users/$user->image");
+            unlink($oldImagePath);
+        }
+        $user->delete();
+        return redirect()->route('user.index')->withStatus(__('User was deleted.'));
     }
 }

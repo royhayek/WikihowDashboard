@@ -7,7 +7,7 @@
 @section('fields')
 
 @include('partials.image', ['placeholder' => 'Icon','id' => 'icon', 'path' => 'categories', 'value' => $data->icon])
-@include('partials.input', ['placeholder' => 'Name','id' => 'name','value' => $data->name])
-@include('partials.textarea', ['placeholder' => 'Description','id' => 'description','value' => $data->description])
+@include('partials.input', ['placeholder' => 'Name','id' => 'name','value' => $data->name, 'required' => true])
+@include('partials.textarea', ['placeholder' => 'Description','id' => 'description','value' => $data->description, 'required' => true])
 
 @endsection

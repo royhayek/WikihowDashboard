@@ -16,4 +16,6 @@
 @include('partials.input', ['placeholder' => 'Password','id' => 'password', 'required' => true, 'value' =>
 $data->password, 'type' => 'password'])
 @include('partials.textarea', ['placeholder' => 'Bio','id' => 'bio', 'value' => $data->bio])
+@include('partials.input', ['placeholder' => 'Website','id' => 'website', 'required' => true, 'value' => $data->website])
+
 @endsection

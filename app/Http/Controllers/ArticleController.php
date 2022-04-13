@@ -4,9 +4,13 @@ namespace App\Http\Controllers;
 
 use App\Models\Article;
 use App\Models\ArticleCategory;
+use App\Models\ArticleMethodPart;
 use App\Models\Category;
 use Auth;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Redirect;
+
+use function PHPUnit\Framework\isEmpty;
 
 class ArticleController extends Controller
 {
@@ -45,6 +49,10 @@ class ArticleController extends Controller
         //     'description' => 'required',
         // ]);
 
+        if ($request->description == null) {
+            return redirect()->back()->with('status', 'The description cannot be null');
+        }
+
         $article = new Article;
         $article->authorId = Auth::user()->id;
         $article->title = $request->title;
@@ -57,6 +65,8 @@ class ArticleController extends Controller
         $article->videoTranscript = $request->videoTranscript;
         $article->keyTakeaways = $request->keyTakeaways;
         $article->views = 0;
+
+
 
         if ($request->hasFile('image')) {
 
@@ -101,8 +111,13 @@ class ArticleController extends Controller
     public function show(Article $article)
     {
         $data = $article;
-        return view('article.addpart', compact('data'));
-
+        $articleparts = ArticleMethodPart::where(['articleId' => $article->id])->get();
+        if (count($articleparts) > 0) {
+            $lastPart =  ((int)$articleparts->last()->part + 1);
+        } else {
+            $lastPart = 1;
+        }
+        return view('article.addpart', compact('data', 'lastPart'));
     }
 
     /**
@@ -113,7 +128,6 @@ class ArticleController extends Controller
      */
     public function edit(Article $article)
     {
-
         $data = $article;
         $categories = Category::all();
         $selectedCategories = ArticleCategory::where('articleId', $article->id)->get();
@@ -130,6 +144,10 @@ class ArticleController extends Controller
     public function update(Request $request, Article $article)
     {
         //
+        if ($article->description == null) {
+            return redirect()->back()->with('status', 'The description cannot be null');
+        }
+        
         $article->title = $request->title;
         $article->description = $request->description;
         $article->tips = $request->tips;
@@ -168,16 +186,16 @@ class ArticleController extends Controller
         $existingArticleCategories = ArticleCategory::where('articleId', $article->id)->pluck('categoryId')->toArray();
         $deletableIds = array_diff($existingArticleCategories, $ids);
 
-        if(!is_null($deletableIds)) {
-            foreach($deletableIds as $deletableId) {
+        if (!is_null($deletableIds)) {
+            foreach ($deletableIds as $deletableId) {
                 ArticleCategory::where(['articleId' => $article->id, 'categoryId' => $deletableId])->delete();
             }
         }
 
-        if($request->categories != null) {
-            foreach($request->categories as $categoryId) {
+        if ($request->categories != null) {
+            foreach ($request->categories as $categoryId) {
                 $existingCategory = ArticleCategory::where(['articleId' => $article->id, 'categoryId' => $categoryId])->first();
-                if($existingCategory) {
+                if ($existingCategory) {
                     $existingCategory->categoryId = $categoryId;
                     $existingCategory->save();
                 } else {
@@ -213,5 +231,4 @@ class ArticleController extends Controller
         $article->delete();
         return redirect()->route('article.index')->withStatus(__('Article was deleted.'));
     }
-
 }

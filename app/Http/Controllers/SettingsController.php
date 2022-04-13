@@ -75,6 +75,7 @@ class SettingsController extends Controller
         $settings->shortDescription = $request->shortDescription;
         $settings->appVersion = $request->appVersion;
         $settings->fcmKey = $request->fcmKey;
+        $settings->aboutUs = $request->aboutUs;
 
         if ($request->hasFile('appLogo')) {
             if ($settings->appLogo != null) {
@@ -88,7 +89,7 @@ class SettingsController extends Controller
             $settings->appLogo = $filename;
         }
 
-        $settings->update();
+        $settings->save();
 
         return redirect()->route('settings.index')->withStatus(__('Settings was updated'));
     }

@@ -6,8 +6,8 @@
 
 @section('fields')
 
-@include('partials.image', ['placeholder' => 'Icon','id' => 'icon', 'path' => 'categories'])
-@include('partials.input', ['placeholder' => 'Name','id' => 'name',])
-@include('partials.textarea', ['placeholder' => 'Description','id' => 'description'])
+@include('partials.image', ['placeholder' => 'Icon','id' => 'icon', 'path' => 'categories', 'required' => true])
+@include('partials.input', ['placeholder' => 'Name','id' => 'name', 'required' => true])
+@include('partials.textarea', ['placeholder' => 'Description','id' => 'description', 'required' => true])
 
 @endsection
